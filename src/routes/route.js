@@ -6,5 +6,6 @@ const blogscontroller=require("../controllers/blogsController")
 router.post('/authors', authorController.createAuthor)
 router.post('/blogs',blogscontroller.createBlogs)
 router.get('/blogs',blogscontroller.allBlogs)
+router.get('/blog',blogscontroller.findById)
 
 module.exports = router;
