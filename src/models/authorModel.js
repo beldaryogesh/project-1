@@ -5,15 +5,14 @@ const authorSchema = new mongoose.Schema(
   {
     fname: { type: String, required: true },
     lname: { type: String, required: true },
-    title: { type: String, enum: [Mr, Mrs, Miss], required: true },
+    title: { type: String, enum: ["Mr", "Mrs", "Miss"], required: true },
     email: {
       type: String,
       unique: true,
       validate: {
-        validator: function (value) {
-          return value === "correct@example.com";
-        },
-        message: "Invalid email.",
+        validator: validator.isEmail,
+        message: "{VALUE} is not a valid email",
+        isAsync: false,
       },
     },
     password: { type: String, required: true },
