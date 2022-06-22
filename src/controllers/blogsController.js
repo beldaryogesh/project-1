@@ -18,7 +18,8 @@ const createBlogs = async function (req, res) {
 const allBlogs = async function (req, res) {
   try {
     let blogs = await blogsModel.find().select({ " isPublished": false, isDeleted: false });
-    if (!blogs) res.status(400).send({ status: true, msg: "No Blogs are found" });
+    if (!blogs)
+      res.status(400).send({ status: true, msg: "No Blogs are found" });
     else res.send({ data: blogs });
   } catch (err) {
     console.log("This is the error :", err.message);
@@ -26,20 +27,22 @@ const allBlogs = async function (req, res) {
   }
 };
 
-const findById= async function (req,res){
-    try{
-    let authorId= req.query.authorId
-    let category=req.query.category
-    if(!authorId) res.status(400).send({status:false,msg:"authorId inavalid"})
-    let particularBlog= await blogsModel.find().select({category:category, authorId:authorId})
-    if(!particularBlog) res.status(400).send({status:false, msg:"NO Blogs are Found"})
-    res.send({data:particularBlog})
-} catch (err) {
+const findById = async function (req, res) {
+  try {
+    let authorId = req.query.authorId;
+    let category = req.query.category;
+    if (!authorId)
+      res.status(400).send({ status: false, msg: "authorId inavalid" });
+    let particularBlog = await blogsModel.find().select({ category: category, authorId: authorId });
+    if (!particularBlog)
+      res.status(400).send({ status: false, msg: "NO Blogs are Found" });
+    res.send({ data: particularBlog });
+  } catch (err) {
     console.log("This is the error :", err.message);
     res.status(500).send({ msg: "Error", error: err.message });
   }
-}
+};
 
 module.exports.createBlogs = createBlogs;
 module.exports.allBlogs = allBlogs;
-module.exports.findById=findById
+module.exports.findById = findById;
