@@ -16,7 +16,7 @@ const createBlogs = async function (req, res) {
     res.status(500).send({ msg: "Error", error: err.message });
   }
 };
-//******************************************************************************************* */
+
 
 const allBlogs = async function (req, res) {
   try {
@@ -29,7 +29,7 @@ const allBlogs = async function (req, res) {
     res.status(500).send({ msg: "Error", error: err.message });
   }
 };
-//********************************************************************************************** */
+
 
 const findById = async function (req, res) {
   try {
@@ -46,7 +46,7 @@ const findById = async function (req, res) {
     res.status(500).send({ msg: "Error", error: err.message });
   }
 };
-//**************************************************************************************************** */
+
 const updateBlog = async function (req, res) {
   try {
     let blogId = req.params.blogId;
@@ -62,7 +62,23 @@ const updateBlog = async function (req, res) {
   }
 }
 
+const isDeleted=async function(req,res){
+  try{
+    let blogId=req.params.blogId
+    let data = req.body
+    if (!blogId) res.status(400).send({ status: false, Msg: "BlogId is not there" })
+    if (!data) res.status(400).send({ status: false, Msg: "Input data not found" })
+    let updateData = await blogsModel.findByIdAndUpdate({ _id: blogId }, { $set:{"isDeleted": true,"deletedAt": Date.now()}}, { new: true })
+    res.status(200).send({ data: updateData })
+  }
+  catch (err) {
+    console.log("this is the error", err)
+    res.status(500).send({ error: err.message })
+  }
+}
+
 module.exports.createBlogs = createBlogs;
 module.exports.allBlogs = allBlogs;
 module.exports.findById = findById;
 module.exports.updateBlog = updateBlog;
+module.exports.isDeleted=isDeleted
