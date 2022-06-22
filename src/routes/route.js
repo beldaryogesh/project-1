@@ -7,5 +7,5 @@ router.post('/authors', authorController.createAuthor)
 router.post('/blogs',blogscontroller.createBlogs)
 router.get('/blogs',blogscontroller.allBlogs)
 router.get('/blog',blogscontroller.findById)
-
+router.put("/blogs/:blogId", blogscontroller.updateBlog)
 module.exports = router;
