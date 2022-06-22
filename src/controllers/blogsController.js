@@ -51,7 +51,7 @@ const updateBlog = async function (req, res) {
   try {
     let blogId = req.params.blogId;
     let data = req.body
-    if (!blogId) res.status(400).send({ status: false, Msg: "BlogId is not there" })
+    if (!blogId) res.status(400).send({ status: false, Msg: "BlogId is not present" })
     if (!data) res.status(400).send({ status: false, Msg: "Input data not found" })
     let updateData = await blogsModel.findByIdAndUpdate({ _id: blogId }, { $set: { "title": data.title, "body": data.body }, "isPublished": true, "publishAt": Date.now() }, { new: true })
     res.status(201).send({ data: updateData })
@@ -62,13 +62,13 @@ const updateBlog = async function (req, res) {
   }
 }
 
-const isDeleted=async function(req,res){
-  try{
-    let blogId=req.params.blogId
+const isDeleted = async function (req, res) {
+  try {
+    let blogId = req.params.blogId
     let data = req.body
-    if (!blogId) res.status(400).send({ status: false, Msg: "BlogId is not there" })
+    if (!blogId) res.status(400).send({ status: false, Msg: "BlogId is not present" })
     if (!data) res.status(400).send({ status: false, Msg: "Input data not found" })
-    let updateData = await blogsModel.findByIdAndUpdate({ _id: blogId }, { $set:{"isDeleted": true,"deletedAt": Date.now()}}, { new: true })
+    let updateData = await blogsModel.findByIdAndUpdate({ _id: blogId }, { $set: { "isDeleted": true, "deletedAt": Date.now() } }, { new: true })
     res.status(200).send({ data: updateData })
   }
   catch (err) {
@@ -76,9 +76,54 @@ const isDeleted=async function(req,res){
     res.status(500).send({ error: err.message })
   }
 }
+//******************************************************************************************* */
+//const deleteBlogsQuery = async function (req, res) {
+// try {
+// let authorId = req.query.authorId;
+// let tags = req.query.tag;
+// let category = req.query.category;
+// let subCategory = req.query.subCategory;
+// let isPublished = req.query.isPublished;
+// let arr = []
+// let blog = await blogsModel.find({authorId : authorId, tags : tags, category : category, subCategory : subCategory, isPublished : isPublished })
+
+// if(!blog) {
+//   return res.status(404).send({status : false, msg : "blog not found"})
+// }
+
+// arr.push(blog)
+// res.status(404).send({msg : err.message})
+
+// }
+// catch (err) {
+//   console.log("this is the error", err)
+//   res.status(500).send({ error: err.message })
+// }
+// }
+
+const deleteBlogsQuery = async function (req, res) {
+  try {
+
+    let data = req.query;
+    let authorId = req.query.authorId
+    if (!authorId == 0) res.status(400).send({ status: false, Msg: "No such authors exists" })
+    if (!data) res.status(400).send({ status: false, msg: "Data is not present" })
+    const deleteByQuery = await blogsModel.updateMany({ $and: [data, { isDeleted: false }] }, { $set: { isDeleted: true, DeletedAt: new Date() } }, { new: true })
+    if (deleteByQuery.modifiedCount == 0) return res.status(400).send({ status: false, msg: "The Blog is already Deleted" })
+
+    res.status(200).send({ status: true, msg: deleteByQuery })
+  }
+
+  catch (err) {
+
+    res.status(500).send({ error: err.message })
+
+  }
+}
 
 module.exports.createBlogs = createBlogs;
 module.exports.allBlogs = allBlogs;
 module.exports.findById = findById;
 module.exports.updateBlog = updateBlog;
-module.exports.isDeleted=isDeleted
+module.exports.isDeleted = isDeleted
+module.exports.deleteBlogsQuery = deleteBlogsQuery;
