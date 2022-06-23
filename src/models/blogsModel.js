@@ -12,7 +12,7 @@ const blogsSchema = new mongoose.Schema(
     isDeleted: { type: Boolean, default: false },
     isPublished: { type: Boolean, default: false },
     deletedAt:String,
-    publishAt:Date,
+    publishAt:String,
   },
   { timestamps: true }
 );
