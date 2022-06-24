@@ -7,7 +7,7 @@ const blogsSchema = new mongoose.Schema(
     body: { type: String, required: true },
     authorId: { type: ObjectId, required: true, ref: "Author" },
     tags: [{ type: String }],
-    category: [{ type: String, required: true }],
+    category: { type: String, required: true },
     subcategory: [{ type: String, required: true }],
     isDeleted: { type: Boolean, default: false },
     isPublished: { type: Boolean, default: false },

@@ -7,6 +7,7 @@ const authorSchema = new mongoose.Schema(
     lname: { type: String, required: true },
     title: { type: String, enum: ["Mr", "Mrs", "Miss"], required: true },
     email: {
+      require:true,
       type: String,
       unique: true,
       validate: {
