@@ -30,23 +30,23 @@ const allBlogs = async function (req, res) {
   }
 };
 
-// const findById = async function (req, res) {
-//   try {
-//     let authorId = req.query.authorId;
-//     let category = req.query.category;
-//     if (!authorId)
-//       res.status(400).send({ status: false, msg: "authorId inavalid" });
-//     let particularBlog = await blogsModel
-//       .find()
-//       .select({ category: category, authorId: authorId });
-//     if (!particularBlog)
-//       res.status(400).send({ status: false, msg: "NO Blogs are Found" });
-//     res.send({ data: particularBlog });
-//   } catch (err) {
-//     console.log("This is the error :", err.message);
-//     res.status(500).send({ msg: "Error", error: err.message });
-//   }
-// };
+const findById = async function (req, res) {
+  try {
+    let authorId = req.query.authorId;
+    let category = req.query.category;
+    if (!authorId)
+      res.status(400).send({ status: false, msg: "authorId inavalid" });
+    let particularBlog = await blogsModel
+      .find()
+      .select({ category: category, authorId: authorId });
+    if (!particularBlog)
+      res.status(400).send({ status: false, msg: "NO Blogs are Found" });
+    res.send({ data: particularBlog });
+  } catch (err) {
+    console.log("This is the error :", err.message);
+    res.status(500).send({ msg: "Error", error: err.message });
+  }
+};
 
 const updateBlog = async function (req, res) {
   try {
@@ -109,7 +109,7 @@ const deleteBlogsQuery = async function (req, res) {
 
 module.exports.createBlogs = createBlogs;
 module.exports.allBlogs = allBlogs;
-//module.exports.findById = findById;
+module.exports.findById = findById;
 module.exports.updateBlog = updateBlog;
 module.exports.isDeleted = isDeleted;
 module.exports.deleteBlogsQuery = deleteBlogsQuery;

@@ -3,7 +3,7 @@ const blogsModel = require("../models/blogsModel");
 const authenticate = async function (req, res, next) {
   try {
     let token = req.headers["x-auth-token"];
-    console.log(token);
+    //console.log(token);
 
     if (!token) token = req.headers["x-auth-token"];
     if (!token)
