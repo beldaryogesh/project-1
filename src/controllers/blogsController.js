@@ -1,7 +1,6 @@
+const mongoose = require("mongoose");
 const blogsModel = require("../models/blogsModel");
 const authorModel = require("../models/authorModel");
-const { trusted } = require("mongoose");
-const { find } = require("../models/blogsModel");
 
 const createBlogs = async function (req, res) {
   try {
@@ -74,40 +73,41 @@ const allBlogs = async function (req, res) {
   }
 };
 
-//TODO: lets complete the filter part
     const FilterBlogs = async function (req, res) {
       try {
 
-//TODO:checking authorid :working fine but individually (just find out how to combined them)
-        //  let authorId1 = req.query.authorId
-        // let authorIdCheck = await authorModel.findById({ _id: authorId1 })
-        // if (!authorIdCheck) {return res.status(400).send({ status: false, msg: "AuthorId is not exist" })}
-        // let blogData = await blogsModel.find({ authorId: authorIdCheck, isPublished: true, isDeleted: false })
-        // if (blogData.length == 0) { return res.status(400).send({ status: false, msg: "No such Blogs are found for this authorId" })}
-        // else { return res.status(200).send({ data: blogData })}
+        if (req.query.authorId)  {
+          let authorId = req.query.authorId
+          let authorIdCheck = await authorModel.find({ _id: authorId})
+          if (authorIdCheck.length==0) {return res.status(400).send({ status: false, msg: "AuthorId is not exist" })}
+          let blogData = await blogsModel.find({ authorId: authorIdCheck, isPublished: true, isDeleted: false })
+          //console.log(blogData)
+          if (blogData.length == 0) { return res.status(400).send({ status: false, msg: "No such Blogs are found for this authorId" })}
+          else { return res.status(200).send({ data: blogData })}
+        }
+        else if (req.query.tags) {
+          let tags = req.query.tags
+          let tagsCheck = await blogsModel.find({ tags: tags, isPublished: true, isDeleted: false })
+          //if there is no tag found in database than it gives a blank array thats why i check that arrays length
 
-//tags working fine but individually (just find out how to combined them)
-        //  let tags = req.query.tags
-        // let tagsCheck = await blogsModel.find({ tags: tags, isPublished: true, isDeleted: false })
-        // //if there is no tag found in database than it gives a blank array thats why i check that arrays length
+          if (tagsCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the tag" }) }
+          else { return res.status(200).send({ data: tagsCheck }) }
+        } 
+        else if (req.query.category){
+          let category = req.query.category
+          let categoryCheck = await blogsModel.find({ category: category, isPublished: true, isDeleted: false })
+          if (categoryCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the category" }) }
+          else { return res.status(200).send({ data: categoryCheck }) };
 
-        // if (tagsCheck.length==0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the tag" }) }  
-        // else { return res.status(200).send({ data: tagsCheck }) }
-
-
-//category working
-        // let category = req.query.category
-        // let categoryCheck = await blogsModel.find({ category: category, isPublished: true, isDeleted: false })
-        // if (categoryCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the category" }) } 
-        // else { return res.status(200).send({ data: categoryCheck }) };
-
-//subcategory working
-        // let subcategory = req.query.subcategory
-        // let subcategoryCheck = await blogsModel.find({ subcategory: subcategory, isPublished: true, isDeleted: false })
-        // if (subcategoryCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the subcategory" }) } 
-        // else { return res.status(200).send({ data: subcategoryCheck }) };
-
-
+        } else if (req.query.subcategory) {
+          
+        let subcategory = req.query.subcategory
+        let subcategoryCheck = await blogsModel.find({ subcategory: subcategory, isPublished: true, isDeleted: false })
+        if (subcategoryCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the subcategory" }) } 
+        else { return res.status(200).send({ data: subcategoryCheck }) };
+        } else{
+          return res.status(400).send({status:false,msg:"Please the details in query params which you want to see"})
+        }
   } catch (err) {
    return res.status(500).send({ msg: "Error", error: err.message });
   }
@@ -136,8 +136,6 @@ const updateBlog = async function (req, res) {
 
 //checking blogId exist or not and also blogId is given or not by user
     let blogId = req.params.blogId;
-    console.log(blogId) //TODO:problem
-    if(blogId.length==0) {return res.status(400).send({status:false,msg:"Please enter the blogId"})};
 
     let idCheck = await blogsModel.findById({ _id: blogId })
     if (!idCheck) {return res.status(400).send({ status: false, Msg:"BlogId does'nt exist"})}
