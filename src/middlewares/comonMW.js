@@ -10,20 +10,19 @@ const authenticate = async function (req, res, next) {
     //checking token must be present in header
     if (!token) token = req.headers["x-api-key"];
     if (!token)
-      return res.send({ status: false, msg: "Token must be present" });
+      { return res.send({ status: false, msg: "Token must be present" })};
 
     //after that decode and verify the token
     let decodedToken = jwt.verify(token, "functionup-radon");
 
     //checking the decoding token
     if (!decodedToken)
-      return res.send({ status: false, msg: "Token is invalid" });
+      {return res.send({ status: false, msg: "Token is invalid" })};
     req.decodedToken = decodedToken;
     next();
 
   } catch (err) {
-    console.log("This is the error :", err.message);
-    res.status(500).send({ msg: "Error", error: err.message });
+    return res.status(500).send({ msg: "Error", error: err.message });
   }
 };
 
@@ -36,14 +35,14 @@ const authorisation = async function (req, res, next) {
     //checking token must be present in header    
     if (!token) token = req.headers["x-api-key"];
     if (!token)
-      return res.send({ status: false, msg: "Token must be present" });
+     { return res.send({ status: false, msg: "Token must be present" })};
 
     //after that decode and verify the token
     let decodedToken = jwt.verify(token, "functionup-radon");
 
     //checking the decoding token/basically checking edge cases
     if (!decodedToken)
-      return res.send({ status: false, msg: "token is invalid" });
+      {return res.send({ status: false, msg: "token is invalid" })};
     req.decodedToken = decodedToken;
 
     //checking authorId
@@ -55,7 +54,7 @@ const authorisation = async function (req, res, next) {
     // res.status(200).send({msg:"authorisation successful"})
     next();
   } catch (error) {
-    res.status(500).send(error.message);
+    return res.status(500).send(error.message);
   }
 };
 

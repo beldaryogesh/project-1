@@ -7,19 +7,21 @@ const blogscontroller = require("../controllers/blogsController")
 const commonMW = require('../middlewares/comonMW')
 
 
-router.post('/authors', authorController.createAuthor)//working
+router.post('/authors', authorController.createAuthor)
 
-router.post('/login', authorController.loginUser)//working
+router.post('/login', authorController.loginUser)
 
-router.post('/blogs', commonMW.authenticate, blogscontroller.createBlogs)//working
+router.post('/blogs', commonMW.authenticate, blogscontroller.createBlogs)
 
-router.get('/blogs', commonMW.authenticate, blogscontroller.allBlogs)//find filter is not a function
+router.get('/blogs', commonMW.authenticate, blogscontroller.allBlogs)
 
-router.put("/blogs/:blogId", commonMW.authorisation, blogscontroller.updateBlog) //working
+router.get('/blog', commonMW.authenticate, blogscontroller.FilterBlogs)//problem
 
-router.delete('/blog/:blogId', commonMW.authorisation, blogscontroller.isDeleted)//working only adding 2-3 edge cases
+router.put("/blogs/:blogId", commonMW.authorisation, blogscontroller.updateBlog)
 
-router.delete("/blogs", commonMW.authorisation, blogscontroller.deleteBlogsQuery)// not checked properlyand also adding some edge cases 
+router.delete('/blog/:blogId', commonMW.authorisation, blogscontroller.isDeletedByParam)
+
+router.delete("/blogs", commonMW.authorisation, blogscontroller.deleteBlogsQuery)// problem
 
 
 module.exports = router;

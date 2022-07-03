@@ -1,110 +1,203 @@
 const blogsModel = require("../models/blogsModel");
 const authorModel = require("../models/authorModel");
+const { trusted } = require("mongoose");
+const { find } = require("../models/blogsModel");
 
 const createBlogs = async function (req, res) {
   try {
-    //edge Cases for createblogs according to Blog model and as per our requirements
-
-    let { ...blogData } = req.body;
-    if (Object.keys(blogData).length == 0)
-      return res.status(400).send({ status: false, msg: "BlogData is required" });
-        
-    if (!req.body.authorId)
-      res.status(400).send({ status: false, msg: "AuthorID is required" });
-
-    if (!req.body.title) { res.status(400).send({ msg: 'Title is required' }) };
-
-    if (!req.body.body) { res.status(400).send({ msg: 'Body is required' }) };
-
-    if (!req.body.category) { res.status(400).send({ msg: 'category is required' }) };
-
-    if (!req.body.subcategory) { res.status(400).send({ msg: 'subcategory is required' }) };
-
-    let regName = /^[a-zA-Z ]{2,7}$/; //checking alphabet
-    if (!regName.test(req.body.title)) return res.status(400).send({ status: false, msg: "title should be in alphabet" })
-    if (!regName.test(req.body.body)) return res.status(400).send({ status: false, msg: "body should be in alphabet" })
-
-    //After the passing all the edge cases now author can created his own new blogs
-    let blog = req.body;
-  let checkauthorId = await authorModel.findById({_id: blogData.authorId} )
-    if (!checkauthorId) {
-      res.status(400).send({ status: false, msg: "Athorid does'nt exist" })
+//edge Cases for createblogs according to Blog model and as per our requirements
+//if body is empty
+    let data = req.body;
+    if (Object.keys(data).length == 0) {
+      return res.status(400).send({ status: false, msg: "Please provide your Blog details in body" })
     };
-    { 
-      let blogCreated = await blogsModel.create(blog);
-      res.status(201).send({ data: blogCreated })
+
+//checking required feilds
+    if (!data.authorId)
+      {return res.status(400).send({ status: false, msg: "AuthorID is required" });}
+
+    if (!data.title)
+     {return res.status(400).send({ msg: 'Title is required' }) };
+
+    if (!data.body)
+     {return res.status(400).send({ msg: 'Body is required' }) };
+
+    if (!data.category)
+     {return res.status(400).send({ msg: 'Category is required' }) };
+
+    if (!data.subcategory)
+     {return res.status(400).send({ msg: 'Subcategory is required' }) };
+
+    if (!data.tags) { return res.status(400).send({ msg: 'Tags is required' }) };
+
+//checking alphabet
+    if (!(/^\s*([a-zA-Z])([^0-9]){2,64}\s*$/.test(data.title))) {
+      return res.status(400).send({ status: false, msg: "Title should be in alphabat type" })
     };
+    if (!(/^\s*([a-zA-Z])([^0-9]){2,64}\s*$/.test(data.body))) {
+      return res.status(400).send({ status: false, msg: "Body should be in alphabat type" })
+    };
+
+//authorid is exist or not
+  let checkauthorId = await authorModel.findById({_id: data.authorId} )
+    if (!checkauthorId) 
+    { return res.status(400).send({ status: false, msg: "AthorId does'nt exist" }) };
+
+//After the passing all the edge cases now author can created his own new blogs
+
+    let blogCreated = await blogsModel.create(data);
+    let finaldata = {
+      blogId: blogCreated._id,
+      title: data.title,
+      body: data.body,
+      authorId: data.authorId,
+      tags: data.tags,
+      category: data.category,
+      subcategory: data.subcategory
+    }
+    {return res.status(201).send(finaldata)}
+
   } catch (err) {
-    console.log("This is the error :", err.message);
-    res.status(500).send({ msg: "Error", error: err.message });
+    return res.status(500).send({ msg: "Error", error: err.message });
   }
 };
 
 const allBlogs = async function (req, res) {
   try {
     //Possible edge cases and the rest is checked by authentication  
-    let blogs = await blogsModel.find().select({ " isPublished": true, isDeleted: false });
+    let blogs = await blogsModel.find({ isPublished: true , isDeleted: false })
     if (!blogs)
-      res.status(400).send({ status: true, msg: "No Blogs are found" });
-    else res.send({ data: blogs });
+    { return res.status(400).send({ status: true, msg: "No Blogs are found" });}
+     else {return res.send({ data: blogs })};
+  } catch (err) {
+    return res.status(500).send({ msg: "Error", error: err.message });
+  }
+};
+
+//TODO: lets complete the filter part
+    const FilterBlogs = async function (req, res) {
+      try {
+
+//TODO:checking authorid :working fine but individually (just find out how to combined them)
+        //  let authorId1 = req.query.authorId
+        // let authorIdCheck = await authorModel.findById({ _id: authorId1 })
+        // if (!authorIdCheck) {return res.status(400).send({ status: false, msg: "AuthorId is not exist" })}
+        // let blogData = await blogsModel.find({ authorId: authorIdCheck, isPublished: true, isDeleted: false })
+        // if (blogData.length == 0) { return res.status(400).send({ status: false, msg: "No such Blogs are found for this authorId" })}
+        // else { return res.status(200).send({ data: blogData })}
+
+//tags working fine but individually (just find out how to combined them)
+        //  let tags = req.query.tags
+        // let tagsCheck = await blogsModel.find({ tags: tags, isPublished: true, isDeleted: false })
+        // //if there is no tag found in database than it gives a blank array thats why i check that arrays length
+
+        // if (tagsCheck.length==0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the tag" }) }  
+        // else { return res.status(200).send({ data: tagsCheck }) }
+
+
+//category working
+        // let category = req.query.category
+        // let categoryCheck = await blogsModel.find({ category: category, isPublished: true, isDeleted: false })
+        // if (categoryCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the category" }) } 
+        // else { return res.status(200).send({ data: categoryCheck }) };
+
+//subcategory working
+        // let subcategory = req.query.subcategory
+        // let subcategoryCheck = await blogsModel.find({ subcategory: subcategory, isPublished: true, isDeleted: false })
+        // if (subcategoryCheck.length == 0) { return res.status(400).send({ status: false, msg: "No such similar blogs are find by the subcategory" }) } 
+        // else { return res.status(200).send({ data: subcategoryCheck }) };
+
 
   } catch (err) {
-    console.log("This is the error :", err.message);
-    res.status(500).send({ msg: "Error", error: err.message });
+   return res.status(500).send({ msg: "Error", error: err.message });
   }
 };
 
 const updateBlog = async function (req, res) {
   try {
-    let blogId = req.params.blogId;
+
+//if body is empty
     let data = req.body;
-    let title = data.title;
-    let body = data.body;
-    let tags = data.tags;
-    let subcategory = data.subcategory
-    //here if we set the validation for all the required feild than author can'nt be update any individual feild at a time
-    //Possible edge cases and the rest is checked by authentication and authorization
-    let { ...blogData } = req.body;
-    if (Object.keys(blogData).length == 0)
-      return res.status(400).send({ status: false, msg: "BlogData is required" });
+    if (Object.keys(data).length == 0) {
+      return res.status(400).send({ status: false, msg: "Please provide which feild you want to update" })
+    };
 
-    let publish = await blogsModel.findById({ _id: blogId })
-    if (!publish == true) res.status(400).send({ status: false, Msg:"BlogId does'nt exist"})
+ //checking required feilds(but i comment out all this just bcz if this code runs than author cant update any individual feild at a time. so for now as per my project requirement i dont need that code to check that validation)
 
+    // if (!data.title) { return res.status(400).send({ msg: 'Title is required' }) };
+
+    // if (!data.body) { return res.status(400).send({ msg: 'Body is required' }) };
+
+    // if (!data.category) { return res.status(400).send({ msg: 'Category is required' }) };
+
+    // if (!data.subcategory) { return res.status(400).send({ msg: 'Subcategory is required' }) };
+
+    // if (!data.tags) { return res.status(400).send({ msg: 'Tags is required' }) };
+
+//checking blogId exist or not and also blogId is given or not by user
+    let blogId = req.params.blogId;
+    console.log(blogId) //TODO:problem
+    if(blogId.length==0) {return res.status(400).send({status:false,msg:"Please enter the blogId"})};
+
+    let idCheck = await blogsModel.findById({ _id: blogId })
+    if (!idCheck) {return res.status(400).send({ status: false, Msg:"BlogId does'nt exist"})}
+
+    let isDeletedCheck = await blogsModel.findOne({ _id: blogId, isDeleted: true })
+    if (isDeletedCheck) { return res.status(400).send({ status: false, Msg: "Blog is already deleted" })};
 
     //after checking all the edge cases than the author can update his blogs
 
-    let updateData = await blogsModel.findByIdAndUpdate({ _id: blogId }, { $set: { title: title, body: body, tags: tags, subcategory: subcategory, isPublished: true, publishAt: Date.now() }, }, { new: true });
-    res.status(201).send({ data: updateData }); 
+    let updateData = await blogsModel.findByIdAndUpdate({ _id: blogId }, { $set: { title: data.title, body: data.body, tags: data.tags, subcategory: data.subcategory, isPublished: true, publishAt: new Date() }}, { new: true });
+
+    let finaldata={
+      blogId:blogId,
+      title:updateData.title,
+      body:updateData.body,
+      authorId:updateData.authorId,
+      tags:updateData.tags,
+      category:updateData.category,
+      subcategory:updateData.subcategory,
+      ispublished:updateData.isPublished,
+      publishAt:updateData.publishAt
+    }
+
+    {return res.status(201).send({ data: finaldata })}; 
 
   } catch (err) {
-    console.log("this is the error", err);
-    res.status(500).send({ error: err.message });
+   return res.status(500).send({ error: err.message });
   }
 };
 
-const isDeleted = async function (req, res) {
+const isDeletedByParam = async function (req, res) {
   try {
     //Possible edge cases and the rest is checked by authentication and authorization
-    let blogId = req.params.blogId;
+    let blogId = req.params.blogId; //TODO:find out
+    if (blogId===0) { return res.status(400).send({ status: false, msg: "Please enter the blogId" }) };
 
-    let check = await blogsModel.find({ isDeleted: true })
-    if (check) res.status(400).send({ status: false, Msg: "Blog is already deleted" });
-
+//blogId match or not
     let check2 = await blogsModel.findById({ _id: blogId })
-    if (!check2== blogId) { res.status(400).send({ status: false, Msg: "BlogId does'nt match" }) }
+    if (!check2) { return res.status(400).send({ status: false, Msg: "BlogId does'nt match" }) }
 
-    //after checking all this validation author can delete his blogs 
-    let updateData = await blogsModel.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true, deletedAt: Date.now() } }, { new: true });
-    res.status(200).send({ data: updateData });
+//blogId is deleted or not
+    let check = await blogsModel.findOne({ _id: blogId, isDeleted: true })
+    if (check) {return res.status(400).send({ status: false, Msg: "Blog is already deleted" })};
+
+ //after checking all this validation author can delete his blogs 
+    let updateData = await blogsModel.findOneAndUpdate({ _id: blogId }, { $set: { isDeleted: true,isPublished:false,deletedAt: new Date() } }, { new: true }); 
+    let finaldata={
+      blogId:blogId,
+      isDeleted:updateData.isDeleted,
+      isPublished:updateData.isPublished,
+      deletedAt:updateData.deletedAt
+    }
+    {return res.status(200).send({ data: finaldata })};
 
   } catch (err) {
-    console.log("this is the error", err);
-    res.status(500).send({ error: err.message });
+     return res.status(500).send({ error: err.message });
   }
 };
 
-
+//TODO:check
 const deleteBlogsQuery = async function (req, res) {
   try {
     //Possible edge cases and the rest is checked by authentication and authorization
@@ -134,5 +227,6 @@ const deleteBlogsQuery = async function (req, res) {
 module.exports.createBlogs = createBlogs;
 module.exports.allBlogs = allBlogs;
 module.exports.updateBlog = updateBlog;
-module.exports.isDeleted = isDeleted;
+module.exports.isDeletedByParam = isDeletedByParam;
 module.exports.deleteBlogsQuery = deleteBlogsQuery;
+module.exports.FilterBlogs=FilterBlogs
