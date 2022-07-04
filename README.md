@@ -88,3 +88,16 @@ In case of unauthorized access return an appropirate error message.
       //   if(!blog || blog.length==0)
       //  { return res.status(400).send({status : false, msg : "not found"})}
       //  else{return res.status(200).send({blog})}
+
+
+    // if (!data.title) { return res.status(400).send({ msg: 'Title is required' }) };
+
+    // if (!data.body) { return res.status(400).send({ msg: 'Body is required' }) };
+
+    // if (!data.category) { return res.status(400).send({ msg: 'Category is required' }) };
+
+    // if (!data.subcategory) { return res.status(400).send({ msg: 'Subcategory is required' }) };
+
+    // if (!data.tags) { return res.status(400).send({ msg: 'Tags is required' }) };
+
+
