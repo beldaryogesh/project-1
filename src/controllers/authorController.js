@@ -1,88 +1,92 @@
 const AuthorModel = require("../models/authorModel");
 const jwt = require("jsonwebtoken");
+const { isValid, isValidRequestBody, nameRegex, emailRegex, passRegex, enumTitle } = require("../middlewares/validation");
+const authorModel = require("../models/authorModel");
 
+//**************************************createAuthor************************************************************ */
 const createAuthor = async function (req, res) {
   try {
-//edge cases according to authormodel
-//if body is empty
-  let data = req.body;
-    if (Object.keys(data).length == 0) {
+    let data = req.body;
+    if (!isValidRequestBody(data)) {
       return res.status(400).send({ status: false, msg: "Please provide your author details in body" })
     };
 
-//for every required feilds
-    if (!req.body.fname) {return res.status(400).send({ msg: "Please enter the fname" }) }
-
-    if (!req.body.lname) {return res.status(400).send({ msg: "Please enter the lname" }) }
-
-    if (!req.body.title) {return res.status(400).send({ msg: "Please enter the title" }) }
-
-    if (!req.body.email) {return res.status(400).send({ msg: "Please enter the email" }) }
-
-    if (!req.body.password) {return res.status(400).send({ msg: "Please enter the password" }) }
-
-//checking alphabet
-    if (!(/^\s*([a-zA-Z])([^0-9]){2,64}\s*$/.test(data.fname))) {
-      return res.status(400).send({ status: false, msg: "Fname should be in alphabat type" })
-    };
-    if (!(/^\s*([a-zA-Z])([^0-9]){2,64}\s*$/.test(data.lname))) {
-      return res.status(400).send({ status: false, msg: "Lname should be in alphabat type" })
-    };
-
-//checking emailid is registered or not and also email format valid or not 
-    if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(data.email))) {
-      return res.status(400).send({ status: false, msg: "please enter a valid Email" })
-    };
-
-//TODO: only add enum check edge cases
-
-//checking email is regusterd or not
-  let emailId= await AuthorModel.findOne({email:data.email})
-     if(emailId)
-     {return res.status(400).send ({status:false,msg:"Email is already registerd"})}
-
-    let finaldata={
-      fname:data.fname,
-      lname:data.lname,
-      title:data.title,
-      email:data.email,
-      password:data.password
+    let { fname, lname, title, email, password, } = data
+    //---------------------------------fname validation--------------------------------------//
+    if (!isValid(fname)) {
+      return res.status(400).send({ status: false, msg: "Please provide the fname" })
     }
-    let authorCreated = await AuthorModel.create(data);
-    {return res.status(201).send(finaldata)};
-
+    if (!nameRegex.test(fname))
+      return res.status(400).send({ status: false, message: "fname should contain alphabets only." })
+    //---------------------------------lname validation--------------------------------------//
+    if (!isValid(lname)) {
+      return res.status(400).send({ status: false, msg: "Please provide the lname" })
+    }
+    if (!nameRegex.test(lname))
+      return res.status(400).send({ status: false, message: "lname should contain alphabets only." })
+    //---------------------------------title validation--------------------------------------//
+    if (!isValid(title)) {
+      return res.status(400).send({ status: false, msg: "Please provide the title" })
+    }
+    if (!enumTitle.test(title)) {
+      return res.status(400).send({ status: false, msg: "Please provide only Mr, Mrs ,Miss title" })
+    }
+    //---------------------------------email validation--------------------------------------//
+    if (!isValid(email)) {
+      return res.status(400).send({ status: false, msg: "Please provide the email" })
+    }
+    if (!emailRegex.test(email))
+      return res.status(400).send({ status: false, message: "Please enter a valid emailId." })
+    let getEmail = await authorModel.findOne({ email: email });
+    if (getEmail) {
+      return res.status(400).send({ status: false, message: "Email is already in use, please enter a new one." });
+    }
+    //---------------------------------password validation--------------------------------------//
+    if (!isValid(password)) {
+      return res.status(400).send({ status: false, msg: "Please provide the password" })
+    }
+    if (!passRegex.test(password))
+      return res.status(400).send({ status: false, message: "Password length should be alphanumeric with 8-15 characters, should contain at least one lowercase, one uppercase and one special character." })
+    //---------------------------------create data--------------------------------------//
+    let authorCreated = await authorModel.create(data);
+    return res.status(201).send({ status: true, message: "author registered successfully", data: authorCreated, })
   }
-   catch (err) {
-   return res.status(500).send({ msg: "Error", error: err.message });
+  catch (err) {
+    return res.status(500).send({ msg: "Error", error: err.message });
   }
 };
 
+//**************************************loginUser**************************************************************** */
+
 const loginUser = async function (req, res) {
   try {
-    let authorName = req.body.email;
+    let email = req.body.email;
     let password = req.body.password;
-    //edge case for authorname and pasword
-    //checking body and email-password must be present 
     let data = req.body;
-    if (Object.keys(data).length == 0) {
-      return res.status(400).send({ status: false, msg: "Please provide your Blog details in body" })
+    if (!isValidRequestBody(data)) {
+      return res.status(400).send({ status: false, msg: "Please provide your login details in body" })
     };
+    //---------------------------------email validation--------------------------------------//
+    if (!isValid(email)) {
+      return res.status(400).send({ status: false, msg: "Please provide the email" })
+    }
+    if (!emailRegex.test(email))
+      return res.status(400).send({ status: false, message: "Please enter a valid emailId." })
+    let getEmail = await authorModel.findOne({ email: email });
+    if (!getEmail) {
+      return res.status(400).send({ status: false, message: "email is not exist in the database." });
+    }
+    //---------------------------------password validation--------------------------------------//
+    if (!isValid(password)) {
+      return res.status(400).send({ status: false, msg: "Please provide the password" })
+    }
+    if (!passRegex.test(password))
+      return res.status(400).send({ status: false, message: "Password length should be alphanumeric with 8-15 characters, should contain at least one lowercase, one uppercase and one special character." })
 
-    if (!authorName) { return res.status(400).send({ status: false, msg: "Email is required" }); }
-
-    if (!password) { return res.status(400).send({ status: false, msg: "Password is required" }); }
-
-//checking emailid is registered or not and also email format valid or not 
-    if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(authorName))) {
-      return res.status(400).send({ status: false, msg: "please enter a valid Email" })
-    };
-
-//checking both feilds are matched or not
-    let author = await AuthorModel.findOne({ emailId: authorName, password: password, });
+    let author = await AuthorModel.findOne({ email: email, password: password, });
     if (!author)
-      return res.status(400).send({ status: false, msg: "Email and Password does'nt match", });
+      return res.status(400).send({ status: false, msg: "Email and Password is not correct", });
 
-    //After checking all edge cases ... now creating token
     let token = jwt.sign(
       {
         authorId: author._id.toString(),
@@ -91,13 +95,12 @@ const loginUser = async function (req, res) {
       },
       "functionup-radon"
     );
-    { res.setHeader("x-api-key", token)};
-  {return  res.status(201).send({ status: true, token: token })};
+    { res.setHeader("x-api-key", token) };
+    { return res.status(201).send({ status: true,message: "successfully", token: token }) };
 
   } catch (err) {
-   return res.status(500).send({ error: err.message });
+    return res.status(500).send({ error: err.message });
   }
 };
 
-module.exports.createAuthor = createAuthor;
-module.exports.loginUser = loginUser;
+module.exports = { createAuthor, loginUser }
