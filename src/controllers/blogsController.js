@@ -212,7 +212,7 @@ const deleteBlogsQuery = async function (req, res) {
     //after checking all this validation author can delete his blogs 
     if (authorId !== undefined) {
       if (!isValid(authorId)) {
-        return res.status(400).send({ status: false, msg: "please provide authorId for update" })
+        return res.status(400).send({ status: false, msg: "please provide authorId for delete a blog" })
       }
       if (!isValidObjectId(authorId)) {
         return res.status(400).send({ status: false, msg: "please provide valid authorId" });
@@ -221,7 +221,7 @@ const deleteBlogsQuery = async function (req, res) {
       if (!checkAuthorId) {
         return res.status(404).send({ status: false, msg: "Author is not exist" });
       }
-      let authorData = await blogsModel.find({ authorId: checkAuthorId, isDeleted: false, isPublished: false })
+      let authorData = await blogsModel.find({ authorId: checkAuthorId, isDeleted: false })
       if (authorData.length == 0) {
         return res.status(404).send({ status: false, msg: "No blogs found for this author" })
       };
@@ -238,38 +238,70 @@ const deleteBlogsQuery = async function (req, res) {
       { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this authorId" }) }
 
     }
-    //else if(data.tags){
-    //   let tagsData = await blogsModel.find({ tags:data.tags , isDeleted: false, isPublished: true })
-    //   if (tagsData.length == 0) {
-    //      return res.status(404).send({ status: false, msg: "Nothing to delete,all blogs are already deleted for this particular tag" }) };
+    else if (data.tags) {
+      let tagsData = await blogsModel.find({
+        tags: tags,
+        isDeleted: false,
+        isPublished: true
+      })
+      if (tagsData.length == 0) {
+        return res.status(404).send({ status: false, msg: "Nothing to delete,all blogs are already deleted for this particular tag" })
+      };
 
-    //   let tData = await blogsModel.updateMany({ tags:data.tags , isDeleted: false, isPublished: true },
-    //      { $set: { isDeleted: true, isPublished: false, isDeletedAt: new Date() } }, { new: true });
-    //   { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this particular tag" }) }
+      let tData = await blogsModel.updateMany({ tags: tags, isDeleted: false },
+        {
+          $set: {
+            isDeleted: true,
+            isPublished: false,
+            isDeletedAt: new Date()
+          }
+        },
+        { new: true });
+      { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this particular tag" }) }
 
-    // } 
-    // else if (data.category) {
-    //   let catData = await blogsModel.find({ category: data.category, isDeleted: false, isPublished: true })
-    //   if (catData.length == 0) { 
-    //     return res.status(404).send({ status: false, msg: "Nothing to delete,all blogs are already deleted for this category" }) };
+    }
+    else if (data.category) {
+      let catData = await blogsModel.find({
+         category: data.category,
+          isDeleted: false,
+          })
+      if (catData.length == 0) { 
+        return res.status(404).send({ status: false, msg: "Nothing to delete,all blogs are already deleted for this category" }) };
 
-    //   let cData = await blogsModel.updateMany({ category: data.category, isDeleted: false, isPublished: true }, 
-    //     { $set: { isDeleted: true, isPublished: false, isDeletedAt: new Date() } }, { new: true });
-    //   { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this category" }) }
-    // }
-    // else if (data.subcategory) {
-    //   let subcatData = await blogsModel.find({ subcategory: data.subcategory, isDeleted: false, isPublished: true })
-    //   if (subcatData.length == 0) {
-    //      return res.status(404).send({ status: false, msg: "Nothing to delete,all blogs are already deleted for this subcategory" }) };
+      let cData = await blogsModel.updateMany({
+         category: data.category,
+          isDeleted: false, 
+          isPublished: true 
+        }, 
+        { $set: {
+           isDeleted: true,
+            isPublished: false,
+             isDeletedAt: new Date()
+             } 
+            }, { new: true });
+      { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this category" }) }
+    }
+    else if (data.subcategory) {
+      let subcatData = await blogsModel.find({ 
+        subcategory: data.subcategory, 
+        isDeleted: false, 
+        isPublished: true 
+      })
+      if (subcatData.length == 0) {
+         return res.status(404).send({ status: false, msg: "Nothing to delete,all blogs are already deleted for this subcategory" }) };
 
-    //   let sData = await blogsModel.updateMany({ subcategory: data.subcategory, isDeleted: false, isPublished: true }, 
-    //     { $set: { isDeleted: true, isPublished: false, isDeletedAt: new Date() } }, { new: true });
-    //   { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this subcategory" }) }
+      let sData = await blogsModel.updateMany({
+         subcategory: data.subcategory, 
+         isDeleted: false, 
+         isPublished: true 
+        }, 
+        { $set: { isDeleted: true, isPublished: false, isDeletedAt: new Date() } }, { new: true });
+      { return res.status(200).send({ status: true, msg: "All Blogs deleted successfully for this subcategory" }) }
 
-    // } 
-    // else {
-    //   return res.status(404).send({ status: false, msg: "Please provide the details in query params which you want to delete" })
-    // }
+    } 
+    else {
+      return res.status(404).send({ status: false, msg: "Please provide the details in query params which you want to delete" })
+    }
 
   }
   catch (err) {
@@ -277,9 +309,4 @@ const deleteBlogsQuery = async function (req, res) {
   }
 };
 
-module.exports = { createBlogs, getBlogs, updateBlog, DeleteBlogsByParam, deleteBlogsQuery};
-// module.exports.allBlogs = allBlogs;
-// module.exports.updateBlog = updateBlog;
-// module.exports.isDeletedByParam = isDeletedByParam;
-// module.exports.deleteBlogsQuery = deleteBlogsQuery;
-// module.exports.FilterBlogs=FilterBlogs
+module.exports = { createBlogs, getBlogs, updateBlog, DeleteBlogsByParam, deleteBlogsQuery };

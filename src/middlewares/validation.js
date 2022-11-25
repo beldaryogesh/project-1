@@ -18,7 +18,5 @@ let phoneRegex = /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/
 let passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,15}$/
 let numRegex = /^[0-9]*$/
 let enumTitle = /^(Mr|Mrs|Miss)$/
-// ["Mr", "Mrs", "Miss"],
-
 
 module.exports={ isValid, isValidRequestBody, nameRegex, emailRegex, phoneRegex, passRegex, numRegex, enumTitle }
